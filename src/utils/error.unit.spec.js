@@ -23,7 +23,8 @@ describe('Unit > Errors', () => {
 
     expect(createError).toHaveBeenCalledTimes(1);
     expect(createError).toHaveBeenCalledWith(
-      StatusCodes.INTERNAL_SERVER_ERROR, 'Error message'
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Error message',
     );
   });
 
@@ -32,7 +33,8 @@ describe('Unit > Errors', () => {
 
     expect(createError).toHaveBeenCalledTimes(1);
     expect(createError).toHaveBeenCalledWith(
-      StatusCodes.UNPROCESSABLE_ENTITY, 'Error message'
+      StatusCodes.UNPROCESSABLE_ENTITY,
+      'Error message',
     );
   });
 });
