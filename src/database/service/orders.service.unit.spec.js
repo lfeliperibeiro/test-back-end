@@ -1,6 +1,7 @@
-import { buildOrders, buildUser } from "test/builders";
+import { buildError, buildOrders, buildUser } from "test/builders";
 import {Order} from "@/database/models/order.model";
 import { listOrders } from "@/database/service/orders.service";
+import { StatusCodes } from "http-status-codes";
 
 jest.mock('@/database/models/order.model')
 JSON.parse = jest.fn()
@@ -29,5 +30,16 @@ describe('Service > Order', () => {
     expect(Order.findAll).toHaveBeenCalledTimes(1)
     expect(Order.findAll).toHaveBeenCalledWith({where})
     expect(JSON.parse).toHaveBeenCalledTimes(3)
+  });
+
+  it("should reject with an error when Order.findAll() fails",  () => {
+    const user = buildUser()
+    
+    const error = buildError(StatusCodes.INTERNAL_SERVER_ERROR,`Failed to retrieve orders for user: ${user.id}`)
+
+    jest.spyOn(Order, 'findAll').mockRejectedValueOnce(error)
+    
+    expect(listOrders(user.id)).rejects.toEqual(error)
+   
   });
 })
