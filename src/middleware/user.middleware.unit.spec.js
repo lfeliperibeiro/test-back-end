@@ -1,6 +1,9 @@
 import { appError } from "@/utils";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { get } from './user.middleware'
+import * as service from '@/database/service'
+
+jest.mock('@/database/service')
 
 describe('Middleware > User', () =>  {
   afterEach(() => {
@@ -35,5 +38,29 @@ describe('Middleware > User', () =>  {
 
     expect(next).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledWith(error)
+  });
+
+  it("should return an user object given a valid email is provided", async() => {
+    const email = 'email@email.com'
+    const req = {headers: {
+        email,
+      }};
+    
+    const next = jest.fn().mockName('next')
+    
+    jest.spyOn(service, 'findOrSave').mockResolvedValueOnce([{
+      id: 1,
+      email
+    }])
+
+    await get(req, null, next)
+    
+    expect(req.user).toBeDefined()
+    expect(req.user).toEqual({
+      id: 1,
+      email
+    })
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledWith(/*nothing*/)
   });
 })
