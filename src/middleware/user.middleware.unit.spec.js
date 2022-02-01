@@ -1,16 +1,13 @@
-import { appError } from "@/utils";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { get } from './user.middleware'
 import * as service from '@/database/service'
-import { buildNext, buildReq } from "test/builders";
+import { buildError, buildNext, buildReq } from "test/builders";
 
 jest.mock('@/database/service')
 
 describe('Middleware > User', () =>  {
-  const error =  appError(
-    `${ReasonPhrases.UNPROCESSABLE_ENTITY}: header should contain a valid email`,
-    StatusCodes.UNPROCESSABLE_ENTITY,
-  );
+  const error = buildError(StatusCodes.UNPROCESSABLE_ENTITY,
+    `${ReasonPhrases.UNPROCESSABLE_ENTITY}: header should contain a valid email`,)
   
   afterEach(() => {
     jest.clearAllMocks()
