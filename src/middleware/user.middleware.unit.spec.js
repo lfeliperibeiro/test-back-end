@@ -63,4 +63,22 @@ describe('Middleware > User', () =>  {
     expect(next).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledWith(/*nothing*/)
   });
+
+  it("should forward an error when service findOrSave fails", async() => {
+    const email = 'email@email.com'
+    const req = {headers: {
+        email,
+      }};
+
+    const next = jest.fn().mockName('next')
+
+    jest.spyOn(service, 'findOrSave').mockRejectedValueOnce('any error')
+
+    await get(req, null, next)
+
+    expect(req.user).toBeUndefined()
+  
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledWith('any error')
+  });
 })
