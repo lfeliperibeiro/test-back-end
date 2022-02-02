@@ -31,6 +31,18 @@ describe('Service > User', () => {
     expect(logger.info).toHaveBeenCalledWith(`User located or created with email: ${user.email}`)
   });
 
+  it("should reject with an error when User.findOrCreate() fails",  () => {
+    const user = buildUser()
+    
+    const error = buildError(StatusCodes.INTERNAL_SERVER_ERROR, 
+      `Failed to retrieve or save user with email: ${user.email}`)
+
+    jest.spyOn(User, 'findOrCreate').mockRejectedValueOnce(error)
+
+    expect(findOrSave(user.email)).rejects.toEqual(error)
+    expect(logger.info).not.toHaveBeenCalled()
+  });
+
   it("should return a list of users", async () => {
     const users = [buildUser(), buildUser()]
 
