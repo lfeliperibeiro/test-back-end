@@ -1,4 +1,4 @@
-import { buildError, buildOrders, buildUser } from "test/builders";
+import { buildError, buildOrder, buildOrders, buildUser } from "test/builders";
 import {Order} from "@/database/models/order.model";
 import { listOrders, saveOrder } from "@/database/service/orders.service";
 import { StatusCodes } from "http-status-codes";
@@ -41,6 +41,24 @@ describe('Service > Order', () => {
     
     expect(listOrders(user.id)).rejects.toEqual(error)
    
+  });
+
+  it("should save and return order", () => {
+    const user = buildUser()
+    const data = {
+      userid: user.id,
+      products: buildOrder(),
+    }
+    
+    const order = {
+      ...data,
+      id: 1
+    }
+    
+    jest.spyOn(Order, 'create').mockResolvedValueOnce(order)
+
+
+    expect(saveOrder(data)).resolves.toEqual(order)
   });
 
   it("should reject with an erro when saveOrder is executed without any data", () => {
