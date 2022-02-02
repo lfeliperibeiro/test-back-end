@@ -2,8 +2,11 @@ import { buildError, buildOrder, buildOrders, buildUser } from "test/builders";
 import {Order} from "@/database/models/order.model";
 import { listOrders, saveOrder } from "@/database/service/orders.service";
 import { StatusCodes } from "http-status-codes";
+import {logger} from "@/utils";
 
 jest.mock('@/database/models/order.model')
+jest.mock('@/utils')
+
 JSON.parse = jest.fn()
 
 describe('Service > Order', () => {
@@ -59,6 +62,8 @@ describe('Service > Order', () => {
 
 
     expect(saveOrder(data)).resolves.toEqual(order)
+    expect(logger.info).toHaveBeenCalledTimes(1)
+    expect(logger.info).toHaveBeenCalledWith(`New order saved`, {data})
   });
 
   it("should reject with an erro when saveOrder is executed without any data", () => {
