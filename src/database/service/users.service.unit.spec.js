@@ -1,6 +1,6 @@
 import { buildError, buildUser } from "test/builders";
 import {User } from "@/database/models/user.model";
-import { listUsers, saveUser } from "@/database/service/users.service";
+import { listUsers, saveUser, findOrSave } from "@/database/service/users.service";
 import { StatusCodes } from "http-status-codes";
 import {logger} from "@/utils";
 
@@ -14,7 +14,23 @@ describe('Service > User', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
-  
+
+  it("should return a user when findOrSave is executed", async () => {
+    const user = buildUser()
+    
+    jest.spyOn(User, 'findOrCreate').mockResolvedValueOnce(user)
+    
+    const savedUser = await findOrSave(user.email)
+    
+    const where = {email: user.email}
+    
+    expect(savedUser).toEqual(user)
+    expect(User.findOrCreate).toHaveBeenCalledTimes(1)
+    expect(User.findOrCreate).toHaveBeenCalledWith({where})
+    expect(logger.info).toHaveBeenCalledTimes(1)
+    expect(logger.info).toHaveBeenCalledWith(`User located or created with email: ${user.email}`)
+  });
+
   it("should return a list of users", async () => {
     const users = [buildUser(), buildUser()]
 
