@@ -64,6 +64,8 @@ describe('Controllers > Orders', () => {
   });
 
   it("should throw an error when an unknown method is provided", () => {
-
+    expect(() => {
+      validate('some unknown method')
+    }).toThrowError('Please provide a valid method name')
   });
 })
