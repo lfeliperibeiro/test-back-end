@@ -41,8 +41,5 @@ describe('Controllers > Orders', () => {
 
     expect(next).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledWith(error)
-
-    
   });
-  
 })
