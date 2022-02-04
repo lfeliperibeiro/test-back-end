@@ -1,12 +1,18 @@
-import { buildError, buildNext, buildOrders, buildReq, buildRes } from "test/builders";
-import {index, validate} from './orders.controller';
+import { buildError, buildNext, buildOrder, buildOrders, buildReq, buildRes } from "test/builders";
+import { create, index, validate } from "./orders.controller";
 import { StatusCodes } from "http-status-codes";
 import * as validator from 'express-validator'
 
 jest.mock('express-validator')
 
+JSON.stringify = jest.fn()
+
 
 describe('Controllers > Orders', () => {
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+  
   it("should return status 200 with a list of orders", async () => { 
     const req = buildReq();
     const res = buildRes()
@@ -67,5 +73,48 @@ describe('Controllers > Orders', () => {
     expect(() => {
       validate('some unknown method')
     }).toThrowError('Please provide a valid method name')
+  });
+
+  it("should return status 200 and the created order id", async () => {
+    const products = buildOrder()
+    const req = buildReq({
+      body: {products}
+    })
+    const res = buildRes()
+    const next = buildNext()
+    const isEmpty = jest.fn().mockReturnValueOnce(true)
+    
+    jest.spyOn(validator, 'validationResult').mockReturnValueOnce({
+      isEmpty
+    })   
+    
+    jest.spyOn(req.service, 'saveOrder').mockResolvedValueOnce({
+      id: 123456
+    })
+    
+    await create(req, res, next)
+
+    expect(JSON.stringify).toHaveBeenCalledTimes(1)
+    expect(JSON.stringify).toHaveBeenCalledWith(products)
+
+    expect(res.status).toHaveBeenCalledTimes(1)
+    expect(res.status).toHaveBeenCalledWith(200)
+
+    expect(res.json).toHaveBeenCalledTimes(1)
+    expect(res.json).toHaveBeenCalledWith({order: {id: 123456}})
+
+    expect(req.service.saveOrder).toHaveBeenCalledTimes(1)
+    expect(req.service.saveOrder).toHaveBeenCalledWith({
+      userid: req.user.id,
+      products: JSON.stringify(products)
+    })
+  });
+
+  it("should forward an error when service.saveOrder fails", () => {
+
+  });
+
+  it("should return validation response when error bag is not empty", () => {
+
   });
 })
