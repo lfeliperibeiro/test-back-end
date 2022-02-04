@@ -94,6 +94,7 @@ describe('Controllers > Orders', () => {
     
     await create(req, res, next)
 
+    expect(isEmpty).toHaveBeenCalledTimes(1)
     expect(JSON.stringify).toHaveBeenCalledTimes(1)
     expect(JSON.stringify).toHaveBeenCalledWith(products)
 
@@ -110,8 +111,30 @@ describe('Controllers > Orders', () => {
     })
   });
 
-  it("should forward an error when service.saveOrder fails", () => {
+  it("should forward an error when service.saveOrder fails", async () => {
+    const products = buildOrder()
+    const req = buildReq({
+      body: { products }
+    })
+    const res = buildRes()
+    const next = buildNext()
+    const isEmpty = jest.fn().mockReturnValueOnce(true)
+    const error = buildError(StatusCodes.INTERNAL_SERVER_ERROR, 'Some error here')
 
+    jest.spyOn(validator, 'validationResult').mockReturnValueOnce({
+      isEmpty
+    })
+
+    jest.spyOn(req.service, 'saveOrder').mockRejectedValueOnce(error)
+
+    await create(req, res, next)
+    
+
+    expect(res.status).not.toHaveBeenCalled()
+    expect(res.json).not.toHaveBeenCalled()
+
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledWith(error)
   });
 
   it("should return validation response when error bag is not empty", () => {
