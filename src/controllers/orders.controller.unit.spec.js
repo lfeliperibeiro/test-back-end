@@ -2,8 +2,10 @@ import { buildError, buildNext, buildOrder, buildOrders, buildReq, buildRes } fr
 import { create, index, validate } from "./orders.controller";
 import { StatusCodes } from "http-status-codes";
 import * as validator from 'express-validator'
+import {validationResponse} from "@/controllers/utils";
 
 jest.mock('express-validator')
+jest.mock('@/controllers/utils')
 
 JSON.stringify = jest.fn()
 
@@ -137,7 +139,26 @@ describe('Controllers > Orders', () => {
     expect(next).toHaveBeenCalledWith(error)
   });
 
-  it("should return validation response when error bag is not empty", () => {
+  it("should return validation response when error bag is not empty", async () => {
+    const req = buildReq()
+    const res = buildRes()
+    const next = buildNext()
+    const errorBag = {
+      isEmpty: jest.fn().mockReturnValueOnce(false),
+      array: jest.fn().mockReturnValueOnce(['error1', 'error2'])
+    }
 
+
+    jest.spyOn(validator, 'validationResult').mockReturnValueOnce(errorBag)
+
+    
+    expect( await create(req, res, next)).toBeUndefined()
+    
+    expect(validationResponse).toHaveBeenCalledTimes(1)
+    expect(validationResponse).toHaveBeenCalledWith(res, errorBag)
+    
+    expect(res.status).not.toHaveBeenCalled()
+    expect(res.json).not.toHaveBeenCalled()
+    
   });
 })
