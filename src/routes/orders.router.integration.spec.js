@@ -48,4 +48,19 @@ describe('Router > Integration > Orders', () => {
 
     done();
   });
+
+  it("should return status 500 and an error message when saveOrder rejects", async done => {
+    const error = buildError(StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to save order')
+    jest.spyOn(service, 'saveOrder').mockRejectedValueOnce(error)
+
+    const res = await buildCall('/api/order', 'post', {
+      products: buildOrder()
+    } )
+
+    expect(res.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR)
+    expect(res.body).toEqual({ message: 'Failed to save order'})
+
+    done();
+  });
 })
