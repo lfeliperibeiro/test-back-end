@@ -1,5 +1,5 @@
 import * as service from '@/database/service';
-import { buildError, buildOrders } from "test/builders";
+import { buildError, buildOrder, buildOrders } from "test/builders";
 import { buildCall } from "test/builders.integration";
 import { StatusCodes } from "http-status-codes";
 
@@ -30,6 +30,21 @@ describe('Router > Integration > Orders', () => {
 
     expect(res.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR)
     expect(res.body).toEqual({ message: 'Failed to retrieve list of orders' })
+
+    done();
+  });
+
+  it("should return status 200 and the newly created order", async done => {
+    jest.spyOn(service, 'saveOrder').mockResolvedValueOnce({
+      id: 123456
+    })
+
+    const res = await buildCall('/api/order', 'post', {
+      products: buildOrder()
+    } )
+
+    expect(res.status).toBe(StatusCodes.OK)
+    expect(res.body).toEqual({ order: {id: 123456 } })
 
     done();
   });
