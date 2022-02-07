@@ -63,4 +63,20 @@ describe('Router > Integration > Orders', () => {
 
     done();
   });
+
+  it("should return status 422 and an error message when validation error are return", async done => {
+    const res = await buildCall('/api/order', 'post')
+
+    expect(res.status).toBe(StatusCodes.UNPROCESSABLE_ENTITY)
+    expect(res.body).toEqual({  "errors":  [
+             {
+               "location": "body",
+               "msg": "Please provide a list of products",
+               "param": "products",
+            },
+     ],
+  })
+
+    done();
+  });
 })
